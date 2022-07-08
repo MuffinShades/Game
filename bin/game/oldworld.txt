@@ -1,0 +1,102 @@
+// old world code
+
+int x = 0;
+		for (int i = 0; i < 15; i++) {
+			for (int l = 0; l < 1; l++) {
+			Log.print("Generating chunck: " + (i+1));
+			
+			double r = sr.rand(i);
+			
+			//Determine biome
+			double mul_r = r * biomes.size();
+			
+			
+			String bi_dat = biomes.get((int) 0);
+			
+			Biome bi = Biome.parse(bi_dat);
+			
+			if (bi.name != lastBiome) {
+				
+				//create biomes perlin map
+				per.setAmp(8);
+				per.setWll(16);
+				per.setPerlinType(bi.perlinType);
+			}
+			
+			//generate 2d noise
+			Perlin2d cvn = new Perlin2d(this.seed);
+			
+			//cave threshold
+			float t = 0.59f;
+			
+			
+			//create a new chunck
+			Chunk CurrentChunck = new Chunk(i*Chunk.CHUNCK_SIZE_X*Main.pix, 0);
+			
+			float offY = 0;
+			
+			for (int j = 0; j <= Chunk.CHUNCK_SIZE_X; j++) {
+				double n = 0;
+				if (l == 0) {
+					n = per.noise(x);
+				}
+				System.out.println(x);
+				
+				//top tile positions
+				float tileY = 0;
+				
+				if (l == 0) {
+					tileY = (float) Math.round(Math.floor(n*Main.pix)/Main.pix) - offY;
+				}
+				float tileX = j;
+				
+				System.out.println(tileY); 
+				
+				//calculate y offset
+				if (j == 0) {
+					offY = Math.round(Math.round(n*Main.pix)/Main.pix);
+				}
+				
+				new Block(tileX * Main.pix + i*Chunk.CHUNCK_SIZE_X*Main.pix, tileY * Main.pix + l * Chunk.CHUNCK_SIZE_Y * Main.pix, Main.pix, 0);
+				
+				//generate basic structure / hills
+				if ((float) Math.round(Math.floor(n*Main.pix)/Main.pix) - offY >= 0 && l == 0) {
+					//CurrentChunck.addTile(tileX, tileY, 0);
+				} else if (l == 0) {
+					int overflows = 1;
+					while (tileY + Chunk.CHUNCK_SIZE_Y * overflows <= 0) {
+						//create a new chunk
+						Chunk overflow_chunk, cnk = Chunk.getChunkAt(i*Chunk.CHUNCK_SIZE_X*Main.pix, 60+(l*Chunk.CHUNCK_SIZE_Y*Main.pix) - (Chunk.CHUNCK_SIZE_Y * Main.pix * (overflows+1)));
+						
+						if (cnk != null) {
+							cnk.addTile(j, tileY + Chunk.CHUNCK_SIZE_Y * overflows, 0);
+						} else {
+							//create a new overflow chunk
+							overflow_chunk = new Chunk(i*Chunk.CHUNCK_SIZE_X*Main.pix, 60+(l*Chunk.CHUNCK_SIZE_Y*Main.pix) - (Chunk.CHUNCK_SIZE_Y * Main.pix));
+							
+							//add overflow tiles
+							overflow_chunk.addTile(j, tileY + Chunk.CHUNCK_SIZE_Y * (overflows+1), 0);
+							overflow_chunk.fill(i, j, n, offY  - (Chunk.CHUNCK_SIZE_Y * Main.pix));
+						}
+						
+						//increase overflow
+						overflows++;
+					}
+				} else {
+					//if its a lower chunk add top crust
+					//CurrentChunck.addTile(tileX, tileY, 0);
+				}
+				
+				//fill the chunk with tiles
+				//CurrentChunck.fill(i, j, n, offY);
+				
+				if (l == 0) {
+					x++;
+				}
+			}
+			
+			lastBiome = bi.name;
+			t = 0.59f;
+			
+			}
+		}

@@ -1,0 +1,4 @@
+inventory_tile=gui_sheet_0.png
+item_id:0-100=item_sheet_0.png
+block_id:0-100=bloock_sheet_0.png
+dmg_indicator_num=game_sheet_0.png
